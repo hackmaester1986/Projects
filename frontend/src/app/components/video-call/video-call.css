@@ -1,0 +1,10 @@
+.video-container {
+    display: flex;
+    justify-content: space-around;
+    video {
+      width: 45%;
+      height: auto;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+  }

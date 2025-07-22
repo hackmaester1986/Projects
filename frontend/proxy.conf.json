@@ -1,0 +1,11 @@
+{
+    "/api": {
+      "target": "http://localhost:5000",
+      "secure": false
+    },
+    "/videochathub": {
+      "target": "http://localhost:5000",
+      "ws": true,
+      "secure": false
+    }
+  }
