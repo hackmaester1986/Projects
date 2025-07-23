@@ -5016,24 +5016,31 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\bryan\\.nuget\\packages\\": {}
+    "C:\\Users\\BryanGermain\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\bryan\\Projects\\CoffeeDates\\CoffeeDates.csproj",
+      "projectUniqueName": "C:\\Users\\BryanGermain\\Projects\\Projects\\CoffeeDates.csproj",
       "projectName": "CoffeeDates",
-      "projectPath": "C:\\Users\\bryan\\Projects\\CoffeeDates\\CoffeeDates.csproj",
-      "packagesPath": "C:\\Users\\bryan\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\bryan\\Projects\\CoffeeDates\\obj\\",
+      "projectPath": "C:\\Users\\BryanGermain\\Projects\\Projects\\CoffeeDates.csproj",
+      "packagesPath": "C:\\Users\\BryanGermain\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\BryanGermain\\Projects\\Projects\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\bryan\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\BryanGermain\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -5051,7 +5058,8 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      }
+      },
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net8.0": {
@@ -5107,7 +5115,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.412/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
