@@ -39,7 +39,7 @@
               <button type="submit" class="btn btn-primary w-100" [disabled]="isLoading">
                 {{ isLoading ? 'Logging in...' : 'Login' }}
               </button>
-              <button type="submit" class="btn btn-primary w-100 mt-3" [disabled]="isLoading">
+              <button type="button" class="btn btn-primary w-100 mt-3" (click)="openRegisterModal()" [disabled]="isLoading">
                 Register
               </button>
   
@@ -52,3 +52,4 @@
       </div>
     </div>
   </div>
+  <app-register (closeModal)="onRegisterModalClose()" [showModal]="showRegisterModal"></app-register>

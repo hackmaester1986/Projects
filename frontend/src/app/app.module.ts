@@ -12,6 +12,8 @@ import { NavbarComponent } from './components/nav-bar/nav-bar';
 import { HomepageComponent } from './components/homepage/homepage';
 import { NgbAlertModule } from '@ng-bootstrap/ng-bootstrap';
 import { HttpClientModule } from '@angular/common/http';
+import { RegisterComponent } from './components/register/register';
+
 
 @NgModule({
   declarations: [
@@ -19,7 +21,8 @@ import { HttpClientModule } from '@angular/common/http';
     LoginComponent,
     VideoCallComponent,
     NavbarComponent,
-    HomepageComponent
+    HomepageComponent,
+    RegisterComponent
   ],
   imports: [
     BrowserModule,

@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SignalrService } from '../../services/signalr';
 
 @Component({
@@ -7,20 +7,31 @@ import { SignalrService } from '../../services/signalr';
   templateUrl: './video-call.html',
   styleUrls: ['./video-call.css']
 })
-export class VideoCallComponent implements OnInit {
+export class VideoCallComponent implements OnInit,OnDestroy {
   @ViewChild('localVideo') localVideo!: ElementRef;
   @ViewChild('remoteVideo') remoteVideo!: ElementRef;
+
+  onlineUsers: string[] = [];
 
   private peer?: RTCPeerConnection;
   private localStream?: MediaStream;
   private remoteStream: MediaStream = new MediaStream();
-  private remoteUserId!: number;
+  private remoteUserId!: string;
 
   constructor(private signalr: SignalrService) {}
+  ngOnDestroy(): void {
+    this.signalr.stopConnection();
+  }
 
   async ngOnInit() {
     this.signalr.startConnection();
-    await this.startMedia();
+    this.signalr.listenForUserList(); // start listening to server events
+
+    // Subscribe to user list updates
+    this.signalr.onUserListUpdate((users: string[]) => {
+      this.onlineUsers = users;
+    });
+    /*await this.startMedia();
 
     this.signalr.onReceiveOffer(async (offer: string) => {
       const offerDesc = new RTCSessionDescription(JSON.parse(offer));
@@ -41,7 +52,7 @@ export class VideoCallComponent implements OnInit {
       } catch (e) {
         console.error('ICE error:', e);
       }
-    });
+    });*/
   }
 
   async startMedia() {
@@ -68,7 +79,7 @@ export class VideoCallComponent implements OnInit {
     });
   }
 
-  async initiateCall(remoteUserId: number) {
+  async initiateCall(remoteUserId: string) {
     this.remoteUserId = remoteUserId;
 
     const offer = await this.peer?.createOffer();

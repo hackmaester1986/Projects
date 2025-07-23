@@ -16,6 +16,7 @@ export class LoginComponent {
   password = '';
   errorMessage = '';
   isLoading = false;
+  showRegisterModal = false;
 
   constructor(private auth: AuthService, private router: Router) {}
 
@@ -31,12 +32,20 @@ export class LoginComponent {
     this.auth.login({ username: this.username, password: this.password }).subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigate(['/video-call']);
+        this.router.navigate(['/homepage']);
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = 'Login failed: ' + (err.error?.message || 'Unknown error');
+        this.errorMessage = 'Invalid username or password';
       }
     });
+  }
+
+  openRegisterModal() {
+    this.showRegisterModal = true;
+  }
+
+  onRegisterModalClose() {
+    this.showRegisterModal = false;
   }
 }

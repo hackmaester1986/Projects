@@ -1,0 +1,49 @@
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /*darken the background*/
+  z-index: 1050; /* higher than other content*/
+}
+
+.modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1060; /* above the backdrop*/
+}
+
+.modal-dialog {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 100%;
+  padding: 20px;
+}
+
+.modal-content {
+  background-color: white;
+  border: none;
+  padding: 1rem;
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+}
+
+.modal-backdrop.show {
+  opacity: 1 !important;
+}
+.modal.show {
+  opacity: 1 !important;
+}

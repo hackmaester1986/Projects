@@ -8,3 +8,11 @@
       border-radius: 8px;
     }
   }
+video {
+  max-height: 300px;
+  border-radius: 8px;
+}
+
+.list-group-item {
+  cursor: pointer;
+}
