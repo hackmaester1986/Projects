@@ -1,5 +1,8 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SignalrService } from '../../services/signalr';
+import { UserService } from '../../services/user-service';
+import { ToastrService } from 'ngx-toastr';
+import { catchError, map, of } from 'rxjs';
 
 @Component({
   selector: 'app-video-call',
@@ -8,10 +11,16 @@ import { SignalrService } from '../../services/signalr';
   styleUrls: ['./video-call.css']
 })
 export class VideoCallComponent implements OnInit,OnDestroy {
+  private userService = inject(UserService);
+
   @ViewChild('localVideo') localVideo!: ElementRef;
   @ViewChild('remoteVideo') remoteVideo!: ElementRef;
 
   onlineUsers: string[] = [];
+  incomingCallModalVisible = false;
+  callerUsername: string = '';
+  currentUserName: string = '';
+  alertMessage = '';
 
   private peer?: RTCPeerConnection;
   private localStream?: MediaStream;
@@ -24,35 +33,47 @@ export class VideoCallComponent implements OnInit,OnDestroy {
   }
 
   async ngOnInit() {
-    this.signalr.startConnection();
-    this.signalr.listenForUserList(); // start listening to server events
 
-    // Subscribe to user list updates
-    this.signalr.onUserListUpdate((users: string[]) => {
-      this.onlineUsers = users;
-    });
-    /*await this.startMedia();
+    this.userService.getCurrentUserName().subscribe(username =>{
+      this.currentUserName = username;
+      this.signalr.startConnection();
+      this.signalr.listenForUserList(); // start listening to server events
 
-    this.signalr.onReceiveOffer(async (offer: string) => {
-      const offerDesc = new RTCSessionDescription(JSON.parse(offer));
-      await this.peer?.setRemoteDescription(offerDesc);
-      const answer = await this.peer?.createAnswer();
-      await this.peer?.setLocalDescription(answer);
-      this.signalr.sendAnswer(this.remoteUserId, JSON.stringify(answer));
-    });
+      // Subscribe to user list updates
+      this.signalr.onUserListUpdate((users: string[]) => {
+        this.onlineUsers = users;
+      });
+      //await this.startMedia();
 
-    this.signalr.onReceiveAnswer(async (answer: string) => {
-      const answerDesc = new RTCSessionDescription(JSON.parse(answer));
-      await this.peer?.setRemoteDescription(answerDesc);
-    });
+      this.signalr.onReceiveOffer(async (offer: string) => {
+        const offerDesc = new RTCSessionDescription(JSON.parse(offer));
+        await this.peer?.setRemoteDescription(offerDesc);
+        const answer = await this.peer?.createAnswer();
+        await this.peer?.setLocalDescription(answer);
+        this.signalr.sendAnswer(this.remoteUserId, JSON.stringify(answer));
+      });
 
-    this.signalr.onReceiveIce(async (candidate: string) => {
-      try {
-        await this.peer?.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
-      } catch (e) {
-        console.error('ICE error:', e);
-      }
-    });*/
+      this.signalr.onReceiveAnswer(async (answer: string) => {
+        const answerDesc = new RTCSessionDescription(JSON.parse(answer));
+        await this.peer?.setRemoteDescription(answerDesc);
+      });
+
+      this.signalr.onReceiveIce(async (candidate: string) => {
+        try {
+          await this.peer?.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
+        } catch (e) {
+          console.error('ICE error:', e);
+        }
+      });
+
+      this.signalr.receiveRequest(async (fromUser: string) =>{
+        this.incomingCallModalVisible = true;
+        this.callerUsername = fromUser;
+      })
+    },
+    error => {
+      console.log('err');
+    })
   }
 
   async startMedia() {
@@ -85,5 +106,17 @@ export class VideoCallComponent implements OnInit,OnDestroy {
     const offer = await this.peer?.createOffer();
     await this.peer?.setLocalDescription(offer);
     this.signalr.sendOffer(remoteUserId, JSON.stringify(offer));
+  }
+
+  sendCallRequest(remoteUserName: string){
+    this.signalr.sendCallRequest(remoteUserName,this.currentUserName);
+  }
+
+  handleCallAccept(){
+
+  }
+
+  handleCallReject(){
+
   }
 }

@@ -43,7 +43,7 @@ export class SignalrService {
     this.hubConnection?.on('ReceiveOffer', callback);
   }
 
-  sendAnswer(toUserId: number, answer: string) {
+  sendAnswer(toUserId: string, answer: string) {
     this.hubConnection?.invoke('SendAnswer', toUserId.toString(), answer);
   }
 
@@ -59,8 +59,16 @@ export class SignalrService {
     this.hubConnection?.on('ReceiveIceCandidate', callback);
   }
 
+  receiveRequest(callback: (fromUser: string) => void) {
+    this.hubConnection?.on('ReceiveRequest', callback);
+  }
+
   onUserListUpdate(callback: (users: string[]) => void) {
     this.userList$.subscribe(callback);
+  }
+
+  sendCallRequest(toUserName: string, fromUserName: string) {
+    this.hubConnection?.invoke('SendRequest', toUserName.toString(), fromUserName);
   }
 
   listenForUserList() {

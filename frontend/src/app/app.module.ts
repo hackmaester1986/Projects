@@ -11,9 +11,9 @@ import { VideoCallComponent } from './components/video-call/video-call';
 import { NavbarComponent } from './components/nav-bar/nav-bar';
 import { HomepageComponent } from './components/homepage/homepage';
 import { NgbAlertModule } from '@ng-bootstrap/ng-bootstrap';
-import { HttpClientModule } from '@angular/common/http';
 import { RegisterComponent } from './components/register/register';
-
+import { RequestModalComponent } from './components/request-modal/request-modal';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -22,7 +22,8 @@ import { RegisterComponent } from './components/register/register';
     VideoCallComponent,
     NavbarComponent,
     HomepageComponent,
-    RegisterComponent
+    RegisterComponent,
+    RequestModalComponent
   ],
   imports: [
     BrowserModule,

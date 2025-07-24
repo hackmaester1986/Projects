@@ -1,32 +1,46 @@
 <app-navbar></app-navbar>
+@if(currentUserName && currentUserName != ''){
+  <div class="container-fluid mt-5">
+    <div class="row">
+      <!-- Main Video Area -->
+      <div class="col-md-9">
+        <h1 class="text-center mb-4">Welcome to CoffeeDates</h1>
+        <p class="text-center">Connect with others through secure, real-time video chat.</p>
 
-<div class="container-fluid mt-5">
-  <div class="row">
-    <!-- Main Video Area -->
-    <div class="col-md-9">
-      <h1 class="text-center mb-4">Welcome to CoffeeDates</h1>
-      <p class="text-center">Connect with others through secure, real-time video chat.</p>
+        <video #localVideo autoplay muted class="w-100 mb-3"></video>
+        <video #remoteVideo autoplay class="w-100"></video>
+      </div>
 
-      <video #localVideo autoplay muted class="w-100 mb-3"></video>
-      <video #remoteVideo autoplay class="w-100"></video>
-    </div>
-
-    <!-- Right Pane for Online Users -->
-    <div class="col-md-3 border-start ps-3">
-      <h5>Online Users</h5>
-      <ul class="list-group">
-        @if(onlineUsers.length > 0){
-          <li *ngFor="let user of onlineUsers" class="list-group-item d-flex justify-content-between align-items-center">
-            {{ user }}
-            <button class="btn btn-sm btn-outline-primary" (click)="initiateCall(user)">Call</button>
-          </li>
-        }
-        @else {
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            There are no users logged in
-          </li>
-        }
-      </ul>
+      <!-- Right Pane for Online Users -->
+      <div class="col-md-3 border-start ps-3">
+        <h5>Online Users</h5>
+        <ul class="list-group">
+          @if(onlineUsers.length > 0){
+            <li *ngFor="let user of onlineUsers" class="list-group-item d-flex justify-content-between align-items-center">
+              {{ user }}
+              @if(user != currentUserName){
+                <button class="btn btn-sm btn-outline-primary" (click)="sendCallRequest(user)">Call</button>
+              }
+            </li>
+          }
+          @else {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              There are no users logged in
+            </li>
+          }
+        </ul>
+      </div>
     </div>
   </div>
-</div>
+  <app-call-request-modal 
+    [show]="incomingCallModalVisible"
+    [username]="callerUsername"
+    (accept)="handleCallAccept()"
+    (reject)="handleCallReject()">
+  </app-call-request-modal>
+}
+@else {
+  <div  class="alert alert-success text-center" role="alert">
+    Could not retrieve current user
+  </div>
+}

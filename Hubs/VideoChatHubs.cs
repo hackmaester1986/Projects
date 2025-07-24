@@ -66,4 +66,9 @@ public class VideoChatHub : Hub
     {
         await Clients.User(toUser).SendAsync("ReceiveIceCandidate", candidate);
     }
+
+    public async Task SendRequest(string toUser, string fromUser)
+    {
+        await Clients.User(toUser).SendAsync("ReceiveRequest", fromUser);
+    }
 }
