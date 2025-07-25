@@ -21,6 +21,8 @@ export class VideoCallComponent implements OnInit,OnDestroy {
   callerUsername: string = '';
   currentUserName: string = '';
   alertMessage = '';
+  private isRemoteDescriptionSet = false;
+  private queuedCandidates: RTCIceCandidate[] = [];
 
   private peer?: RTCPeerConnection;
   private localStream?: MediaStream;
@@ -45,11 +47,32 @@ export class VideoCallComponent implements OnInit,OnDestroy {
       });
       //await this.startMedia();
 
+      /*this.signalr.onReceiveOffer(async (fromUser:userHubConnection,offer: string) => {
+        await this.startMedia(fromUser.userId.toString());
+        const offerDesc = new RTCSessionDescription(JSON.parse(offer));
+        console.log('remote description ' + offerDesc);
+        await this.peer?.setRemoteDescription(offerDesc);
+        const answer = await this.peer?.createAnswer();
+        await this.peer?.setLocalDescription(answer);
+        this.signalr.sendAnswer(fromUser.userId.toString(), JSON.stringify(answer));
+      });*/
       this.signalr.onReceiveOffer(async (fromUser:userHubConnection,offer: string) => {
         await this.startMedia(fromUser.userId.toString());
         const offerDesc = new RTCSessionDescription(JSON.parse(offer));
         console.log('remote description ' + offerDesc);
         await this.peer?.setRemoteDescription(offerDesc);
+        this.isRemoteDescriptionSet = true;
+
+        // Apply any ICE candidates received before remote description
+        this.queuedCandidates.forEach(async candidate => {
+          try {
+            await this.peer?.addIceCandidate(candidate);
+          } catch (err) {
+            console.error('Error applying queued ICE candidate:', err);
+          }
+        });
+        this.queuedCandidates = [];
+
         const answer = await this.peer?.createAnswer();
         await this.peer?.setLocalDescription(answer);
         this.signalr.sendAnswer(fromUser.userId.toString(), JSON.stringify(answer));
@@ -62,12 +85,27 @@ export class VideoCallComponent implements OnInit,OnDestroy {
         await this.peer?.setRemoteDescription(answerDesc);
       });
 
-      this.signalr.onReceiveIce(async (candidate: string) => {
+      /*this.signalr.onReceiveIce(async (candidate: string) => {
         try {
           console.log('add ice');
           await this.peer?.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
         } catch (e) {
           console.error('ICE error:', e);
+        }
+      });*/
+      this.signalr.onReceiveIce(async (candidate: string) => {
+        const iceCandidate = new RTCIceCandidate(JSON.parse(candidate));
+
+        if (this.isRemoteDescriptionSet) {
+          console.log('Applying ICE candidate immediately');
+          try {
+            await this.peer?.addIceCandidate(iceCandidate);
+          } catch (e) {
+            console.error('ICE error:', e);
+          }
+        } else {
+          console.log('Queueing ICE candidate');
+          this.queuedCandidates.push(iceCandidate);
         }
       });
 
