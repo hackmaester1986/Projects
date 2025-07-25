@@ -11,8 +11,8 @@ import { userHubConnection } from '../../Models/userHubConnection';
 })
 export class VideoCallComponent implements OnInit, OnDestroy {
   private userService = inject(UserService);
-  @ViewChild('localVideo') localVideo!: ElementRef;
-  @ViewChild('remoteVideo') remoteVideo!: ElementRef;
+  @ViewChild('localVideo') localVideo!: ElementRef<HTMLVideoElement>;
+  @ViewChild('remoteVideo') remoteVideo!: ElementRef<HTMLVideoElement>;
 
   onlineUsers: userHubConnection[] = [];
   incomingCallModalVisible = false;
@@ -98,6 +98,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     });
 
     this.remoteStream = new MediaStream();
+    console.log(this.remoteStream);
     this.remoteVideo.nativeElement.srcObject = this.remoteStream;
 
     this.peer.onicecandidate = (event) => {
