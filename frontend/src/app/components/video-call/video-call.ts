@@ -46,10 +46,10 @@ export class VideoCallComponent implements OnInit,OnDestroy {
       //await this.startMedia();
 
       this.signalr.onReceiveOffer(async (fromUser:userHubConnection,offer: string) => {
+        await this.startMedia(fromUser.userId.toString());
         const offerDesc = new RTCSessionDescription(JSON.parse(offer));
         console.log('remote description ' + offerDesc);
         await this.peer?.setRemoteDescription(offerDesc);
-        await this.startMedia(fromUser.userId.toString());
         const answer = await this.peer?.createAnswer();
         await this.peer?.setLocalDescription(answer);
         this.signalr.sendAnswer(fromUser.userId.toString(), JSON.stringify(answer));
@@ -64,6 +64,7 @@ export class VideoCallComponent implements OnInit,OnDestroy {
 
       this.signalr.onReceiveIce(async (candidate: string) => {
         try {
+          console.log('add ice');
           await this.peer?.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
         } catch (e) {
           console.error('ICE error:', e);
