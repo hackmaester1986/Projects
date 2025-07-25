@@ -355,3 +355,4 @@ C:\Users\BryanGermain\Projects\Projects\obj\Debug\net8.0\refint\CoffeeDates.dll
 C:\Users\BryanGermain\Projects\Projects\obj\Debug\net8.0\CoffeeDates.pdb
 C:\Users\BryanGermain\Projects\Projects\obj\Debug\net8.0\CoffeeDates.genruntimeconfig.cache
 C:\Users\BryanGermain\Projects\Projects\obj\Debug\net8.0\ref\CoffeeDates.dll
+C:\Users\bryan\Projects\CoffeeDates\obj\Debug\net8.0\CoffeeDates.sourcelink.json
