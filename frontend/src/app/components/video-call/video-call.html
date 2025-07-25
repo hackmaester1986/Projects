@@ -7,9 +7,16 @@
         <h1 class="text-center mb-4">Welcome to CoffeeDates</h1>
         <p class="text-center">Connect with others through secure, real-time video chat.</p>
 
-        <video #localVideo autoplay muted class="w-100 mb-3"></video>
-        <video #remoteVideo autoplay class="w-100"></video>
-        <button *ngIf="peer" (click)="endCall()">End Call</button>
+        <div class="video-call-container">
+          <div class="video-wrapper">
+            <video #localVideo autoplay muted playsinline class="video-box border" ></video>
+            <video #remoteVideo autoplay playsinline class="video-box border" ></video>
+          </div>
+
+          <button class="btn btn-danger end-call-button mt-3" (click)="endCall()">
+            End Call
+          </button>
+        </div>
       </div>
 
       <!-- Right Pane for Online Users -->
