@@ -57,15 +57,17 @@ export class VideoCallComponent implements OnInit,OnDestroy {
         this.signalr.sendAnswer(fromUser.userId.toString(), JSON.stringify(answer));
       });*/
       this.signalr.onReceiveOffer(async (fromUser:userHubConnection,offer: string) => {
+        console.log('receive offer start media');
         await this.startMedia(fromUser.userId.toString());
         const offerDesc = new RTCSessionDescription(JSON.parse(offer));
-        console.log('remote description ' + offerDesc);
+        console.log('set remote descrip receiver');
         await this.peer?.setRemoteDescription(offerDesc);
         this.isRemoteDescriptionSet = true;
 
         // Apply any ICE candidates received before remote description
         this.queuedCandidates.forEach(async candidate => {
           try {
+            console.log('add qued ice cands')
             await this.peer?.addIceCandidate(candidate);
           } catch (err) {
             console.error('Error applying queued ICE candidate:', err);
@@ -79,9 +81,8 @@ export class VideoCallComponent implements OnInit,OnDestroy {
       });
 
       this.signalr.onReceiveAnswer(async (answer: string) => {
-        console.log('Received answer:', answer);
         const answerDesc = new RTCSessionDescription(JSON.parse(answer));
-        console.log('remote description');
+        console.log('set remote descrip sender')
         await this.peer?.setRemoteDescription(answerDesc);
       });
 
@@ -126,37 +127,38 @@ export class VideoCallComponent implements OnInit,OnDestroy {
   async startMedia(remoteId:string) {
     this.localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     this.localVideo.nativeElement.srcObject = this.localStream;
-
+    console.log('set peer');
     this.peer = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
     });
 
     this.peer.onicecandidate = (event) => {
       if (event.candidate) {
+        console.log('send ice')
         this.signalr.sendIceCandidate(remoteId, JSON.stringify(event.candidate));
       }
     };
 
     this.peer.ontrack = (event) => {
       event.streams[0].getTracks().forEach(track => this.remoteStream.addTrack(track));
-      console.log(this.remoteStream);
       this.remoteVideo.nativeElement.srcObject = this.remoteStream;
     };
 
     this.localStream.getTracks().forEach(track => {
-      console.log('stream ' + this.localStream);
+      console.log('create local stream');
       this.peer?.addTrack(track, this.localStream!);
     });
   }
 
   async initiateCall(remoteUser: userHubConnection) {
+    console.log('start media sender');
     await this.startMedia(remoteUser.userId.toString());
-    console.log('Local stream tracks before offer:', this.localStream?.getTracks());
+    console.log('sender create offer');
     const offer = await this.peer?.createOffer();
     await this.peer?.setLocalDescription(offer);
     var user = this.onlineUsers.find(user => user.userName == this.currentUserName);
     if(user){
-
+      console.log('send offer');
       this.signalr.sendOffer(remoteUser,user, JSON.stringify(offer));
     }
   }
