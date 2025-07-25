@@ -9,10 +9,16 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 export class RequestModalComponent {
   @Input() show: boolean = false;
   @Input() username: string = '';
-  @Output() accept = new EventEmitter<void>();
-  @Output() reject = new EventEmitter<void>();
+  @Output() accept = new EventEmitter<string>();
+  @Output() reject = new EventEmitter<string>();
 
   close() {
-    this.reject.emit();
+    this.show = false;
+    this.reject.emit(this.username);
+  }
+
+  acceptCall(){
+    this.show = false;
+    this.accept.emit(this.username);
   }
 }

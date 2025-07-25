@@ -3,11 +3,12 @@ import * as signalR from '@microsoft/signalr';
 import { environment } from '../../environments/environments';
 import { AuthService } from './auth';
 import { Subject } from 'rxjs';
+import { userHubConnection } from '../Models/userHubConnection';
 
 @Injectable({ providedIn: 'root' })
 export class SignalrService {
   private hubConnection?: signalR.HubConnection;
-  private userListSubject = new Subject<string[]>();
+  private userListSubject = new Subject<userHubConnection[]>();
   userList$ = this.userListSubject.asObservable();
 
   constructor(private auth: AuthService) {
@@ -26,7 +27,7 @@ export class SignalrService {
       .then(() => console.log('SignalR connected'))
       .catch(err => console.error('SignalR error:', err));
 
-    this.hubConnection.on('UserListUpdate', (users: string[]) => {
+    this.hubConnection.on('UserListUpdate', (users: userHubConnection[]) => {
       this.userListSubject.next(users);
     });
   }
@@ -35,11 +36,11 @@ export class SignalrService {
     this.hubConnection?.stop();
   }
 
-  sendOffer(toUserId: string, offer: string) {
-    this.hubConnection?.invoke('SendOffer', toUserId.toString(), offer);
+  sendOffer(toUser: userHubConnection,fromUser: userHubConnection, offer: string) {
+    this.hubConnection?.invoke('SendOffer', toUser,fromUser, offer);
   }
 
-  onReceiveOffer(callback: (offer: string) => void) {
+  onReceiveOffer(callback: (fromUser:userHubConnection,offer: string) => void) {
     this.hubConnection?.on('ReceiveOffer', callback);
   }
 
@@ -59,20 +60,28 @@ export class SignalrService {
     this.hubConnection?.on('ReceiveIceCandidate', callback);
   }
 
-  receiveRequest(callback: (fromUser: string) => void) {
+  receiveRequest(callback: (fromUser: userHubConnection) => void) {
     this.hubConnection?.on('ReceiveRequest', callback);
   }
 
-  onUserListUpdate(callback: (users: string[]) => void) {
+  receiveDenyRequest(callback: () => void) {
+    this.hubConnection?.on('ReceiveDenyRequest', callback);
+  }
+
+  onUserListUpdate(callback: (users: userHubConnection[]) => void) {
     this.userList$.subscribe(callback);
   }
 
-  sendCallRequest(toUserName: string, fromUserName: string) {
-    this.hubConnection?.invoke('SendRequest', toUserName.toString(), fromUserName);
+  sendCallRequest(toUser: userHubConnection, fromUser: userHubConnection) {
+    this.hubConnection?.invoke('SendRequest', toUser, fromUser);
+  }
+
+  sendCallRequestDeny(fromUser: userHubConnection) {
+    this.hubConnection?.invoke('SendRequestDeny',fromUser);
   }
 
   listenForUserList() {
-    this.hubConnection?.on('UserListUpdated', (users: string[]) => {
+    this.hubConnection?.on('UserListUpdated', (users: userHubConnection[]) => {
       this.userListSubject.next(users);
     });
   } 

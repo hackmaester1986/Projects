@@ -1,8 +1,7 @@
 import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SignalrService } from '../../services/signalr';
 import { UserService } from '../../services/user-service';
-import { ToastrService } from 'ngx-toastr';
-import { catchError, map, of } from 'rxjs';
+import { userHubConnection } from '../../Models/userHubConnection';
 
 @Component({
   selector: 'app-video-call',
@@ -16,8 +15,9 @@ export class VideoCallComponent implements OnInit,OnDestroy {
   @ViewChild('localVideo') localVideo!: ElementRef;
   @ViewChild('remoteVideo') remoteVideo!: ElementRef;
 
-  onlineUsers: string[] = [];
+  onlineUsers: userHubConnection[] = [];
   incomingCallModalVisible = false;
+  showDenyModal = false;
   callerUsername: string = '';
   currentUserName: string = '';
   alertMessage = '';
@@ -40,17 +40,19 @@ export class VideoCallComponent implements OnInit,OnDestroy {
       this.signalr.listenForUserList(); // start listening to server events
 
       // Subscribe to user list updates
-      this.signalr.onUserListUpdate((users: string[]) => {
+      this.signalr.onUserListUpdate((users: userHubConnection[]) => {
         this.onlineUsers = users;
       });
       //await this.startMedia();
 
-      this.signalr.onReceiveOffer(async (offer: string) => {
+      this.signalr.onReceiveOffer(async (fromUser:userHubConnection,offer: string) => {
+        console.log(fromUser);
+        await this.startMedia(fromUser.userId.toString());
         const offerDesc = new RTCSessionDescription(JSON.parse(offer));
         await this.peer?.setRemoteDescription(offerDesc);
         const answer = await this.peer?.createAnswer();
         await this.peer?.setLocalDescription(answer);
-        this.signalr.sendAnswer(this.remoteUserId, JSON.stringify(answer));
+        this.signalr.sendAnswer(fromUser.userId.toString(), JSON.stringify(answer));
       });
 
       this.signalr.onReceiveAnswer(async (answer: string) => {
@@ -66,9 +68,13 @@ export class VideoCallComponent implements OnInit,OnDestroy {
         }
       });
 
-      this.signalr.receiveRequest(async (fromUser: string) =>{
+      this.signalr.receiveRequest(async (fromUser: userHubConnection) =>{
         this.incomingCallModalVisible = true;
-        this.callerUsername = fromUser;
+        this.callerUsername = fromUser.userName;
+      })
+
+      this.signalr.receiveDenyRequest(async () => {
+        this.showDenyModal = true;
       })
     },
     error => {
@@ -76,7 +82,7 @@ export class VideoCallComponent implements OnInit,OnDestroy {
     })
   }
 
-  async startMedia() {
+  async startMedia(remoteId:string) {
     this.localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     this.localVideo.nativeElement.srcObject = this.localStream;
 
@@ -86,7 +92,7 @@ export class VideoCallComponent implements OnInit,OnDestroy {
 
     this.peer.onicecandidate = (event) => {
       if (event.candidate) {
-        this.signalr.sendIceCandidate(this.remoteUserId, JSON.stringify(event.candidate));
+        this.signalr.sendIceCandidate(remoteId, JSON.stringify(event.candidate));
       }
     };
 
@@ -100,23 +106,43 @@ export class VideoCallComponent implements OnInit,OnDestroy {
     });
   }
 
-  async initiateCall(remoteUserId: string) {
-    this.remoteUserId = remoteUserId;
+  async initiateCall(remoteUser: userHubConnection) {
 
     const offer = await this.peer?.createOffer();
     await this.peer?.setLocalDescription(offer);
-    this.signalr.sendOffer(remoteUserId, JSON.stringify(offer));
+    var user = this.onlineUsers.find(user => user.userName == this.currentUserName);
+    if(user){
+
+      await this.startMedia(remoteUser.userId.toString());
+      this.signalr.sendOffer(remoteUser,user, JSON.stringify(offer));
+    }
   }
 
-  sendCallRequest(remoteUserName: string){
-    this.signalr.sendCallRequest(remoteUserName,this.currentUserName);
+  sendCallRequest(remoteUser: userHubConnection){
+    var user = this.onlineUsers.find(user => user.userName == this.currentUserName);
+    if(user && remoteUser){
+      this.signalr.sendCallRequest(remoteUser,user);
+    }
   }
 
-  handleCallAccept(){
-
+  handleCallAccept(username: string){
+    var user = this.onlineUsers.find(user => user.userName == username);
+    console.log(username + ' ' + user);
+    if(user){
+      this.initiateCall(user);
+    }
   }
 
-  handleCallReject(){
+  handleCallReject(username:string){
+    this.incomingCallModalVisible=false;
+    var user = this.onlineUsers.find(user => user.userName == username);
+    if(user){
+      this.signalr.sendCallRequestDeny(user);
+    }
+    
+  }
 
+  handleCallDeny(){
+    this.showDenyModal = false;
   }
 }

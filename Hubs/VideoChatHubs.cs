@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 public class VideoChatHub : Hub
 {
     private readonly AppDbContext _context;
-    private static ConcurrentDictionary<string, string> _users = new();
+    private static ConcurrentDictionary<string, UserHubConnection> _users = new();
     public VideoChatHub(AppDbContext context)
     {
         _context = context;
@@ -14,22 +14,26 @@ public class VideoChatHub : Hub
     public override async Task OnConnectedAsync()
     {
         var userIdClaim = Context.User?.FindFirst(ClaimTypes.NameIdentifier);
-
         if (userIdClaim != null)
         {
             // Ensure this matches your User.Id type
             if (int.TryParse(userIdClaim.Value, out int userId))
             {
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                UserHubConnection userHubConnection = new UserHubConnection()
+                {
+                    UserId = user.Id,
+                    UserName = user.Username,
+                    ConnectionId = Context.ConnectionId
+                };
                 if (user != null)
                 {
-                    _users[user.Username] = Context.ConnectionId;
+                    _users[user.Username] = userHubConnection;
                     Console.WriteLine($"User {user.Username} connected with ID {Context.ConnectionId}");
                 }
             }
         }
-
-        await Clients.All.SendAsync("UserListUpdate", _users.Keys.ToList());
+        await Clients.All.SendAsync("UserListUpdate", _users.Values.ToList());
         await base.OnConnectedAsync();
     }
 
@@ -49,12 +53,12 @@ public class VideoChatHub : Hub
                 }
             }
         }
-        await Clients.All.SendAsync("UserListUpdate", _users.Keys.ToList());
+        await Clients.All.SendAsync("UserListUpdate", _users.Values.ToList());
         await base.OnDisconnectedAsync(exception);
     }
-    public async Task SendOffer(string toUser, string offer)
+    public async Task SendOffer(UserHubConnection toUser,UserHubConnection fromUser, string offer)
     {
-        await Clients.User(toUser).SendAsync("ReceiveOffer", offer);
+        await Clients.User(toUser.UserId.ToString()).SendAsync("ReceiveOffer",fromUser, offer);
     }
 
     public async Task SendAnswer(string toUser, string answer)
@@ -67,8 +71,13 @@ public class VideoChatHub : Hub
         await Clients.User(toUser).SendAsync("ReceiveIceCandidate", candidate);
     }
 
-    public async Task SendRequest(string toUser, string fromUser)
+    public async Task SendRequest(UserHubConnection toUser, UserHubConnection fromUser)
     {
-        await Clients.User(toUser).SendAsync("ReceiveRequest", fromUser);
+        await Clients.User(toUser.UserId.ToString()).SendAsync("ReceiveRequest", fromUser);
+    }
+
+    public async Task SendRequestDeny(UserHubConnection toUser)
+    {
+        await Clients.User(toUser.UserId.ToString()).SendAsync("ReceiveDenyRequest");
     }
 }

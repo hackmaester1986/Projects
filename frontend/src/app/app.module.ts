@@ -14,6 +14,7 @@ import { NgbAlertModule } from '@ng-bootstrap/ng-bootstrap';
 import { RegisterComponent } from './components/register/register';
 import { RequestModalComponent } from './components/request-modal/request-modal';
 import { HttpClientModule } from '@angular/common/http';
+import { DenyRequestModal } from './components/deny-request-modal/deny-request-modal';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import { HttpClientModule } from '@angular/common/http';
     NavbarComponent,
     HomepageComponent,
     RegisterComponent,
-    RequestModalComponent
+    RequestModalComponent,
+    DenyRequestModal
   ],
   imports: [
     BrowserModule,

@@ -17,8 +17,8 @@
         <ul class="list-group">
           @if(onlineUsers.length > 0){
             <li *ngFor="let user of onlineUsers" class="list-group-item d-flex justify-content-between align-items-center">
-              {{ user }}
-              @if(user != currentUserName){
+              {{ user.userName }}
+              @if(user.userName != currentUserName){
                 <button class="btn btn-sm btn-outline-primary" (click)="sendCallRequest(user)">Call</button>
               }
             </li>
@@ -35,9 +35,13 @@
   <app-call-request-modal 
     [show]="incomingCallModalVisible"
     [username]="callerUsername"
-    (accept)="handleCallAccept()"
-    (reject)="handleCallReject()">
+    (accept)="handleCallAccept($event)"
+    (reject)="handleCallReject($event)">
   </app-call-request-modal>
+  <app-deny-request-modal
+    [show]="showDenyModal"
+    (ok)="handleCallDeny()">
+  </app-deny-request-modal>
 }
 @else {
   <div  class="alert alert-success text-center" role="alert">
