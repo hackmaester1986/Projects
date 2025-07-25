@@ -56,9 +56,9 @@ public class VideoChatHub : Hub
         await Clients.All.SendAsync("UserListUpdate", _users.Values.ToList());
         await base.OnDisconnectedAsync(exception);
     }
-    public async Task SendOffer(UserHubConnection toUser,UserHubConnection fromUser, string offer)
+    public async Task SendOffer(UserHubConnection toUser, UserHubConnection fromUser, string offer)
     {
-        await Clients.User(toUser.UserId.ToString()).SendAsync("ReceiveOffer",fromUser, offer);
+        await Clients.User(toUser.UserId.ToString()).SendAsync("ReceiveOffer", fromUser, offer);
     }
 
     public async Task SendAnswer(string toUser, string answer)
@@ -79,5 +79,9 @@ public class VideoChatHub : Hub
     public async Task SendRequestDeny(UserHubConnection toUser)
     {
         await Clients.User(toUser.UserId.ToString()).SendAsync("ReceiveDenyRequest");
+    } 
+    public async Task SendHangUp(string toUserId)
+    {
+        await Clients.User(toUserId).SendAsync("ReceiveHangUp");
     }
 }

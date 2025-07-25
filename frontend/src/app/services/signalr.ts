@@ -85,4 +85,12 @@ export class SignalrService {
       this.userListSubject.next(users);
     });
   } 
+
+  sendHangUp(remoteUserId: string) {
+    this.hubConnection?.invoke("SendHangUp", remoteUserId);
+  }
+
+  receiveHangUp(callback: () => void) {
+    this.hubConnection?.on("ReceiveHangUp", callback);
+  }
 }
