@@ -46,10 +46,10 @@ export class VideoCallComponent implements OnInit,OnDestroy {
       //await this.startMedia();
 
       this.signalr.onReceiveOffer(async (fromUser:userHubConnection,offer: string) => {
-        console.log(fromUser);
-        await this.startMedia(fromUser.userId.toString());
         const offerDesc = new RTCSessionDescription(JSON.parse(offer));
+        console.log('remote description ' + offerDesc);
         await this.peer?.setRemoteDescription(offerDesc);
+        await this.startMedia(fromUser.userId.toString());
         const answer = await this.peer?.createAnswer();
         await this.peer?.setLocalDescription(answer);
         this.signalr.sendAnswer(fromUser.userId.toString(), JSON.stringify(answer));
@@ -57,12 +57,13 @@ export class VideoCallComponent implements OnInit,OnDestroy {
 
       this.signalr.onReceiveAnswer(async (answer: string) => {
         const answerDesc = new RTCSessionDescription(JSON.parse(answer));
+        console.log('remote description');
         await this.peer?.setRemoteDescription(answerDesc);
       });
 
       this.signalr.onReceiveIce(async (candidate: string) => {
         try {
-          console.log('receiveice');
+          console.log('add Ice candidate ');
           await this.peer?.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
         } catch (e) {
           console.error('ICE error:', e);
@@ -93,23 +94,25 @@ export class VideoCallComponent implements OnInit,OnDestroy {
 
     this.peer.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log('sendice');
         this.signalr.sendIceCandidate(remoteId, JSON.stringify(event.candidate));
       }
     };
 
     this.peer.ontrack = (event) => {
+      console.log('track received ' + event);
       event.streams[0].getTracks().forEach(track => this.remoteStream.addTrack(track));
       this.remoteVideo.nativeElement.srcObject = this.remoteStream;
     };
 
     this.localStream.getTracks().forEach(track => {
+      console.log('stream ' + this.localStream);
       this.peer?.addTrack(track, this.localStream!);
     });
   }
 
   async initiateCall(remoteUser: userHubConnection) {
     await this.startMedia(remoteUser.userId.toString());
+    console.log('Local stream tracks before offer:', this.localStream?.getTracks());
     const offer = await this.peer?.createOffer();
     await this.peer?.setLocalDescription(offer);
     var user = this.onlineUsers.find(user => user.userName == this.currentUserName);
@@ -128,7 +131,6 @@ export class VideoCallComponent implements OnInit,OnDestroy {
 
   handleCallAccept(username: string){
     var user = this.onlineUsers.find(user => user.userName == username);
-    console.log(username + ' ' + user);
     if(user){
       this.initiateCall(user);
     }
