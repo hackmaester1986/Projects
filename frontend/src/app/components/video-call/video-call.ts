@@ -107,13 +107,12 @@ export class VideoCallComponent implements OnInit,OnDestroy {
   }
 
   async initiateCall(remoteUser: userHubConnection) {
-
+    await this.startMedia(remoteUser.userId.toString());
     const offer = await this.peer?.createOffer();
     await this.peer?.setLocalDescription(offer);
     var user = this.onlineUsers.find(user => user.userName == this.currentUserName);
     if(user){
 
-      await this.startMedia(remoteUser.userId.toString());
       this.signalr.sendOffer(remoteUser,user, JSON.stringify(offer));
     }
   }
