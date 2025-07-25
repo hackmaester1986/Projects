@@ -98,8 +98,10 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     });
 
     this.remoteStream = new MediaStream();
-    console.log(this.remoteStream);
-    this.remoteVideo.nativeElement.srcObject = this.remoteStream;
+    setTimeout(() => {
+      if(this.remoteStream)
+        this.remoteVideo.nativeElement.srcObject = this.remoteStream;
+    }, 2000);
 
     this.peer.onicecandidate = (event) => {
       if (event.candidate) {
