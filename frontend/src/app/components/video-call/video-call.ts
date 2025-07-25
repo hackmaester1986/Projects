@@ -9,6 +9,168 @@ import { userHubConnection } from '../../Models/userHubConnection';
   templateUrl: './video-call.html',
   styleUrls: ['./video-call.css']
 })
+export class VideoCallComponent implements OnInit, OnDestroy {
+  private userService = inject(UserService);
+  @ViewChild('localVideo') localVideo!: ElementRef;
+  @ViewChild('remoteVideo') remoteVideo!: ElementRef;
+
+  onlineUsers: userHubConnection[] = [];
+  incomingCallModalVisible = false;
+  showDenyModal = false;
+  callerUsername: string = '';
+  currentUserName: string = '';
+  alertMessage = '';
+
+  private peer?: RTCPeerConnection;
+  private localStream?: MediaStream;
+  private remoteStream: MediaStream = new MediaStream();
+  private remoteUserId!: string;
+  private queuedCandidates: RTCIceCandidate[] = [];
+
+  constructor(private signalr: SignalrService) {}
+
+  ngOnDestroy(): void {
+    this.cleanup();
+    this.signalr.stopConnection();
+  }
+
+  async ngOnInit() {
+    this.userService.getCurrentUserName().subscribe(username => {
+      this.currentUserName = username;
+      this.signalr.startConnection();
+      this.signalr.listenForUserList();
+
+      this.signalr.onUserListUpdate((users: userHubConnection[]) => {
+        this.onlineUsers = users;
+      });
+
+      this.signalr.onReceiveOffer(async (fromUser: userHubConnection, offer: string) => {
+        await this.setupConnection(fromUser.userId.toString());
+        await this.peer?.setRemoteDescription(new RTCSessionDescription(JSON.parse(offer)));
+
+        const answer = await this.peer?.createAnswer();
+        await this.peer?.setLocalDescription(answer);
+        this.signalr.sendAnswer(fromUser.userId.toString(), JSON.stringify(answer));
+
+        this.queuedCandidates.forEach(async candidate => {
+          await this.peer?.addIceCandidate(candidate);
+        });
+        this.queuedCandidates = [];
+      });
+
+      this.signalr.onReceiveAnswer(async (answer: string) => {
+        await this.peer?.setRemoteDescription(new RTCSessionDescription(JSON.parse(answer)));
+      });
+
+      this.signalr.onReceiveIce(async (candidate: string) => {
+        const iceCandidate = new RTCIceCandidate(JSON.parse(candidate));
+        if (this.peer?.remoteDescription && this.peer.remoteDescription.type) {
+          await this.peer.addIceCandidate(iceCandidate);
+        } else {
+          this.queuedCandidates.push(iceCandidate);
+        }
+      });
+
+      this.signalr.receiveRequest((fromUser: userHubConnection) => {
+        this.incomingCallModalVisible = true;
+        this.callerUsername = fromUser.userName;
+      });
+
+      this.signalr.receiveDenyRequest(() => {
+        this.showDenyModal = true;
+      });
+    });
+  }
+
+  private async setupConnection(remoteId: string) {
+    this.cleanup();
+
+    this.localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    this.localVideo.nativeElement.srcObject = this.localStream;
+
+    this.peer = new RTCPeerConnection({
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+    });
+
+    this.peer.onicecandidate = (event) => {
+      if (event.candidate) {
+        this.signalr.sendIceCandidate(remoteId, JSON.stringify(event.candidate));
+      }
+    };
+
+    this.peer.ontrack = (event) => {
+      event.streams[0].getTracks().forEach(track => this.remoteStream.addTrack(track));
+      this.remoteVideo.nativeElement.srcObject = this.remoteStream;
+    };
+
+    this.localStream.getTracks().forEach(track => {
+      this.peer?.addTrack(track, this.localStream!);
+    });
+  }
+
+  async initiateCall(remoteUser: userHubConnection) {
+    await this.setupConnection(remoteUser.userId.toString());
+    const offer = await this.peer?.createOffer();
+    await this.peer?.setLocalDescription(offer);
+
+    const caller = this.onlineUsers.find(u => u.userName === this.currentUserName);
+    if (caller) {
+      this.signalr.sendOffer(remoteUser, caller, JSON.stringify(offer));
+    }
+  }
+
+  sendCallRequest(remoteUser: userHubConnection) {
+    const caller = this.onlineUsers.find(u => u.userName === this.currentUserName);
+    if (caller) {
+      this.signalr.sendCallRequest(remoteUser, caller);
+    }
+  }
+
+  handleCallAccept(username: string) {
+    const user = this.onlineUsers.find(u => u.userName === username);
+    if (user) {
+      this.initiateCall(user);
+    }
+  }
+
+  handleCallReject(username: string) {
+    this.incomingCallModalVisible = false;
+    const user = this.onlineUsers.find(u => u.userName === username);
+    if (user) {
+      this.signalr.sendCallRequestDeny(user);
+    }
+  }
+
+  handleCallDeny() {
+    this.showDenyModal = false;
+  }
+
+  private cleanup() {
+    this.peer?.close();
+    this.peer = undefined;
+
+    this.localStream?.getTracks().forEach(track => track.stop());
+    this.localStream = undefined;
+
+    this.remoteStream = new MediaStream();
+    if (this.remoteVideo?.nativeElement) {
+      this.remoteVideo.nativeElement.srcObject = null;
+    }
+  }
+}
+
+
+/*import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { SignalrService } from '../../services/signalr';
+import { UserService } from '../../services/user-service';
+import { userHubConnection } from '../../Models/userHubConnection';
+
+@Component({
+  selector: 'app-video-call',
+  standalone: false,
+  templateUrl: './video-call.html',
+  styleUrls: ['./video-call.css']
+})
 export class VideoCallComponent implements OnInit,OnDestroy {
   private userService = inject(UserService);
 
@@ -47,15 +209,7 @@ export class VideoCallComponent implements OnInit,OnDestroy {
       });
       //await this.startMedia();
 
-      /*this.signalr.onReceiveOffer(async (fromUser:userHubConnection,offer: string) => {
-        await this.startMedia(fromUser.userId.toString());
-        const offerDesc = new RTCSessionDescription(JSON.parse(offer));
-        console.log('remote description ' + offerDesc);
-        await this.peer?.setRemoteDescription(offerDesc);
-        const answer = await this.peer?.createAnswer();
-        await this.peer?.setLocalDescription(answer);
-        this.signalr.sendAnswer(fromUser.userId.toString(), JSON.stringify(answer));
-      });*/
+
       this.signalr.onReceiveOffer(async (fromUser:userHubConnection,offer: string) => {
         console.log('receive offer start media');
         await this.startMedia(fromUser.userId.toString());
@@ -86,14 +240,6 @@ export class VideoCallComponent implements OnInit,OnDestroy {
         await this.peer?.setRemoteDescription(answerDesc);
       });
 
-      /*this.signalr.onReceiveIce(async (candidate: string) => {
-        try {
-          console.log('add ice');
-          await this.peer?.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
-        } catch (e) {
-          console.error('ICE error:', e);
-        }
-      });*/
       this.signalr.onReceiveIce(async (candidate: string) => {
         const iceCandidate = new RTCIceCandidate(JSON.parse(candidate));
 
@@ -139,10 +285,7 @@ export class VideoCallComponent implements OnInit,OnDestroy {
       }
     };
 
-    /*this.peer.ontrack = (event) => {
-      event.streams[0].getTracks().forEach(track => this.remoteStream.addTrack(track));
-      this.remoteVideo.nativeElement.srcObject = this.remoteStream;
-    };*/
+
     this.peer.ontrack = (event) => {
       console.log('ontrack event', event);
       event.track.onunmute = () => {
@@ -201,4 +344,4 @@ export class VideoCallComponent implements OnInit,OnDestroy {
   handleCallDeny(){
     this.showDenyModal = false;
   }
-}
+}*/
