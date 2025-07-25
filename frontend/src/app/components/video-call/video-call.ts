@@ -46,7 +46,6 @@ export class VideoCallComponent implements OnInit,OnDestroy {
       //await this.startMedia();
 
       this.signalr.onReceiveOffer(async (fromUser:userHubConnection,offer: string) => {
-        console.log(fromUser);
         await this.startMedia(fromUser.userId.toString());
         const offerDesc = new RTCSessionDescription(JSON.parse(offer));
         await this.peer?.setRemoteDescription(offerDesc);
@@ -56,13 +55,13 @@ export class VideoCallComponent implements OnInit,OnDestroy {
       });
 
       this.signalr.onReceiveAnswer(async (answer: string) => {
+        console.log('Received answer:', answer);
         const answerDesc = new RTCSessionDescription(JSON.parse(answer));
         await this.peer?.setRemoteDescription(answerDesc);
       });
 
       this.signalr.onReceiveIce(async (candidate: string) => {
         try {
-          console.log('receiveice');
           await this.peer?.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
         } catch (e) {
           console.error('ICE error:', e);
@@ -93,7 +92,6 @@ export class VideoCallComponent implements OnInit,OnDestroy {
 
     this.peer.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log('sendice');
         this.signalr.sendIceCandidate(remoteId, JSON.stringify(event.candidate));
       }
     };
@@ -128,7 +126,6 @@ export class VideoCallComponent implements OnInit,OnDestroy {
 
   handleCallAccept(username: string){
     var user = this.onlineUsers.find(user => user.userName == username);
-    console.log(username + ' ' + user);
     if(user){
       this.initiateCall(user);
     }
