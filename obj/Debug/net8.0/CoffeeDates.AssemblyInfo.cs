@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CoffeeDates")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e7e8be8859e79fa0edf03f8a9e291724689ce87f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2abf051a628558540778587ad59ed2eb5e7e5ebb")]
 [assembly: System.Reflection.AssemblyProductAttribute("CoffeeDates")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CoffeeDates")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
