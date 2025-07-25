@@ -138,8 +138,8 @@ export class VideoCallComponent implements OnInit,OnDestroy {
     };
 
     this.peer.ontrack = (event) => {
-      console.log('track received ' + event);
       event.streams[0].getTracks().forEach(track => this.remoteStream.addTrack(track));
+      console.log(this.remoteStream);
       this.remoteVideo.nativeElement.srcObject = this.remoteStream;
     };
 
