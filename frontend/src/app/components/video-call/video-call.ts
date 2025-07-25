@@ -62,6 +62,7 @@ export class VideoCallComponent implements OnInit,OnDestroy {
 
       this.signalr.onReceiveIce(async (candidate: string) => {
         try {
+          console.log('receiveice');
           await this.peer?.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
         } catch (e) {
           console.error('ICE error:', e);
@@ -92,6 +93,7 @@ export class VideoCallComponent implements OnInit,OnDestroy {
 
     this.peer.onicecandidate = (event) => {
       if (event.candidate) {
+        console.log('sendice');
         this.signalr.sendIceCandidate(remoteId, JSON.stringify(event.candidate));
       }
     };
