@@ -139,9 +139,21 @@ export class VideoCallComponent implements OnInit,OnDestroy {
       }
     };
 
-    this.peer.ontrack = (event) => {
+    /*this.peer.ontrack = (event) => {
       event.streams[0].getTracks().forEach(track => this.remoteStream.addTrack(track));
       this.remoteVideo.nativeElement.srcObject = this.remoteStream;
+    };*/
+    this.peer.ontrack = (event) => {
+      console.log('ontrack event', event);
+      event.track.onunmute = () => {
+        // Ensure the track is only added once
+        if (!this.remoteStream.getTracks().includes(event.track)) {
+          this.remoteStream.addTrack(event.track);
+        }
+
+        // Assign the fully built stream to the video element
+        this.remoteVideo.nativeElement.srcObject = this.remoteStream;
+      };
     };
 
     this.localStream.getTracks().forEach(track => {
