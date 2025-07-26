@@ -17,10 +17,12 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   onlineUsers: userHubConnection[] = [];
   incomingCallModalVisible = false;
   showDenyModal = false;
+  showBusyModal = false;
   callerUsername: string = '';
   currentUserName: string = '';
   alertMessage = '';
   remoteUserId = '';
+  inACall = false;
 
   public peer?: RTCPeerConnection;
   private localStream?: MediaStream;
@@ -40,21 +42,28 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       });
 
       this.signalr.onReceiveOffer(async (fromUser: userHubConnection, offer: string) => {
-        await this.setupConnection(fromUser.userId.toString());
-        await this.peer?.setRemoteDescription(new RTCSessionDescription(JSON.parse(offer)));
+        if(!this.inACall){
+          this.inACall = true;
+          await this.setupConnection(fromUser.userId.toString());
+          await this.peer?.setRemoteDescription(new RTCSessionDescription(JSON.parse(offer)));
 
-        const answer = await this.peer?.createAnswer();
-        await this.peer?.setLocalDescription(answer);
-        this.signalr.sendAnswer(fromUser.userId.toString(), JSON.stringify(answer));
+          const answer = await this.peer?.createAnswer();
+          await this.peer?.setLocalDescription(answer);
+          this.signalr.sendAnswer(fromUser.userId.toString(), JSON.stringify(answer));
 
-        for (const candidate of this.queuedCandidates) {
-          await this.peer?.addIceCandidate(candidate);
+          for (const candidate of this.queuedCandidates) {
+            await this.peer?.addIceCandidate(candidate);
+          }
+          this.queuedCandidates = [];
+          this.remoteUserId = fromUser.userId.toString();
         }
-        this.queuedCandidates = [];
-        this.remoteUserId = fromUser.userId.toString();
+        else{
+          this.signalr.sendBusy(fromUser.userId.toString());
+        }
       });
 
       this.signalr.onReceiveAnswer(async (answer: string) => {
+        this.inACall = true;
         await this.peer?.setRemoteDescription(new RTCSessionDescription(JSON.parse(answer)));
       });
 
@@ -68,8 +77,13 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       });
 
       this.signalr.receiveRequest((fromUser: userHubConnection) => {
-        this.incomingCallModalVisible = true;
-        this.callerUsername = fromUser.userName;
+        if(!this.inACall){
+          this.incomingCallModalVisible = true;
+          this.callerUsername = fromUser.userName;
+        }
+        else{
+          this.signalr.sendBusy(fromUser.userId.toString());
+        }
       });
 
       this.signalr.receiveDenyRequest(() => {
@@ -79,6 +93,10 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       this.signalr.receiveHangUp(() => {
         this.endCall();
       });
+
+      this.signalr.receiveBusy(() => {
+        this.showBusyModal = true;
+      })
     });
   }
 
@@ -159,7 +177,12 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     this.showDenyModal = false;
   }
 
+  handleBusy() {
+    this.showBusyModal = false;
+  }
+
   endCall() {
+    this.inACall = false;
     if (this.remoteUserId) {
       this.signalr.sendHangUp(this.remoteUserId);
     }
