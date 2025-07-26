@@ -9,6 +9,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 export class DenyRequestModal {
   @Input() show: boolean = false;
   @Output() ok = new EventEmitter<void>();
+  @Input() message: string = '';
 
   close() {
     this.show = false;

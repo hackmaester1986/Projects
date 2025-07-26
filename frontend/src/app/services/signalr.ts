@@ -93,4 +93,12 @@ export class SignalrService {
   receiveHangUp(callback: () => void) {
     this.hubConnection?.on("ReceiveHangUp", callback);
   }
+
+  sendBusy(remoteUserId: string) {
+    this.hubConnection?.invoke("SendBusy", remoteUserId);
+  }
+
+  receiveBusy(callback: () => void) {
+    this.hubConnection?.on("ReceiveBusy", callback);
+  }
 }

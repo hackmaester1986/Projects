@@ -79,9 +79,14 @@ public class VideoChatHub : Hub
     public async Task SendRequestDeny(UserHubConnection toUser)
     {
         await Clients.User(toUser.UserId.ToString()).SendAsync("ReceiveDenyRequest");
-    } 
+    }
     public async Task SendHangUp(string toUserId)
     {
         await Clients.User(toUserId).SendAsync("ReceiveHangUp");
     }
+    public async Task SendBusy(string toUserId)
+    {
+        await Clients.User(toUserId).SendAsync("ReceiveBusy");
+    }
+
 }

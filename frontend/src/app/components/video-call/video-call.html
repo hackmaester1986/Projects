@@ -12,10 +12,12 @@
             <video #localVideo playsInline autoplay muted class="video-box border" ></video>
             <video #remoteVideo playsInline autoplay class="video-box border" ></video>
           </div>
-
-          <button class="btn btn-danger end-call-button mt-3" (click)="endCall()">
-            End Call
-          </button>
+          @if(inACall)
+          {
+            <button class="btn btn-danger end-call-button mt-3" (click)="endCall()">
+              End Call
+            </button>
+          }
         </div>
 
       </div>
@@ -28,7 +30,7 @@
             <li *ngFor="let user of onlineUsers" class="list-group-item d-flex justify-content-between align-items-center">
               {{ user.userName }}
               @if(user.userName != currentUserName){
-                <button class="btn btn-sm btn-outline-primary" (click)="sendCallRequest(user)">Call</button>
+                <button class="btn btn-sm btn-outline-primary" (click)="sendCallRequest(user)" [disabled]="inACall">Call</button>
               }
             </li>
           }
@@ -48,8 +50,14 @@
     (reject)="handleCallReject($event)">
   </app-call-request-modal>
   <app-deny-request-modal
+    [message]="'Call Request denied'"
     [show]="showDenyModal"
     (ok)="handleCallDeny()">
+  </app-deny-request-modal>
+  <app-deny-request-modal
+    [message]="'The user you are trying to contact is currently on another call'"
+    [show]="showBusyModal"
+    (ok)="handleBusy()">
   </app-deny-request-modal>
 }
 @else {
