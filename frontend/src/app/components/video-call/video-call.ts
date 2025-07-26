@@ -119,7 +119,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       if(this.remoteStream)
         this.remoteVideo.nativeElement.srcObject = this.remoteStream;
-    }, 2000);
+    }, 10000);
 
     this.peer.onicecandidate = (event) => {
       if (event.candidate) {
