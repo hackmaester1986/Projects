@@ -43,7 +43,6 @@ export class VideoCallComponent implements OnInit, OnDestroy {
 
       this.signalr.onReceiveOffer(async (fromUser: userHubConnection, offer: string) => {
 
-        console.log(this.inACall);
         if (!this.inACall) {
           this.inACall = true;
           await this.setupConnection(fromUser.userId.toString());
@@ -91,11 +90,11 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       });
 
       this.signalr.receiveHangUp(() => {
-        this.endCall();
+        this.endCall(true);
       });
 
       this.signalr.receiveBusy(() => {
-        this.endCall();
+        this.endCall(false);
         this.showBusyModal = true;
       });
     });
@@ -179,9 +178,9 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     this.showBusyModal = false;
   }
 
-  endCall() {
+  endCall(sendHangup: boolean) {
     this.inACall = false;
-    if (this.remoteUserId) {
+    if (this.remoteUserId && sendHangup) {
       this.signalr.sendHangUp(this.remoteUserId);
     }
     this.cleanup();
