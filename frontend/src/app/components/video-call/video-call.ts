@@ -59,7 +59,6 @@ export class VideoCallComponent implements OnInit, OnDestroy {
           this.queuedCandidates = [];
           this.remoteUserId = fromUser.userId.toString();
         } else {
-          this.endCall();
           this.signalr.sendBusy(fromUser.userId.toString());
         }
       });
@@ -83,7 +82,6 @@ export class VideoCallComponent implements OnInit, OnDestroy {
           this.incomingCallModalVisible = true;
           this.callerUsername = fromUser.userName;
         } else {
-          this.endCall();
           this.signalr.sendBusy(fromUser.userId.toString());
         }
       });
@@ -97,6 +95,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       });
 
       this.signalr.receiveBusy(() => {
+        this.endCall();
         this.showBusyModal = true;
       });
     });
