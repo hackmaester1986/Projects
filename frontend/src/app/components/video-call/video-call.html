@@ -1,67 +1,91 @@
-<app-navbar></app-navbar>
-@if(currentUserName && currentUserName != ''){
-  <div class="container-fluid mt-5">
-    <div class="row">
-      <!-- Main Video Area -->
-      <div class="col-md-9">
-        <h1 class="text-center mb-4">Welcome to CoffeeDates</h1>
-        <p class="text-center">Connect with others through secure, real-time video chat.</p>
+@if(!speedDating){
+  <app-navbar></app-navbar>
+  @if(currentUserName && currentUserName != ''){
+    <div class="container-fluid mt-5">
+      <div class="row">
+        <!-- Main Video Area -->
+        <div class="col-md-8">
+          <h1 class="text-center mb-4">Welcome to CoffeeDates</h1>
+          <p class="text-center">Connect with others through secure, real-time video chat.</p>
 
-        <div class="video-call-container">
-          <div class="video-wrapper">
-            <video #localVideo playsInline autoplay muted class="video-box border" ></video>
-            <video #remoteVideo playsInline autoplay class="video-box border" ></video>
+          <div class="video-call-container">
+            <div class="video-wrapper">
+              <video #localVideo playsInline autoplay muted class="video-box border" ></video>
+              <video #remoteVideo playsInline autoplay class="video-box border" ></video>
+            </div>
+            @if(inACall)
+            {
+              <button class="btn btn-danger end-call-button mt-3" (click)="endCall(true)">
+                End Call
+              </button>
+            }
           </div>
-          @if(inACall)
-          {
-            <button class="btn btn-danger end-call-button mt-3" (click)="endCall(true)">
-              End Call
+
+        </div>
+
+        <div class="col-md-1 d-flex flex-column align-items-start pt-4">
+          @if(showGroupCounter){
+            <button class="btn btn-primary" (click)="removeFromSpeedDateGroup()">
+              Remove
+            </button>
+            <div class="mt-2 auto-margin">{{groupCount}} / 4</div>
+          }
+          @else {
+            <button class="btn btn-primary" (click)="addToSpeedDateGroup()">
+              Join Speed Dating
             </button>
           }
         </div>
 
-      </div>
-
-      <!-- Right Pane for Online Users -->
-      <div class="col-md-3 border-start ps-3">
-        <h5>Online Users</h5>
-        <ul class="list-group">
-          @if(onlineUsers.length > 0){
-            <li *ngFor="let user of onlineUsers" class="list-group-item d-flex justify-content-between align-items-center">
-              {{ user.userName }}
-              @if(user.userName != currentUserName){
-                <button class="btn btn-sm btn-outline-primary" (click)="sendCallRequest(user)" [disabled]="inACall">Call</button>
-              }
-            </li>
-          }
-          @else {
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              There are no users logged in
-            </li>
-          }
-        </ul>
+        <!-- Right Pane for Online Users -->
+        <div class="col-md-2 border-start ps-3">
+          <h5>Online Users</h5>
+          <ul class="list-group">
+            @if(onlineUsers.length > 0){
+              <li *ngFor="let user of onlineUsers" class="list-group-item d-flex justify-content-between align-items-center">
+                {{ user.userName }}
+                @if(user.userName != currentUserName){
+                  <button class="btn btn-sm btn-outline-primary" (click)="sendCallRequest(user)" [disabled]="inACall">Call</button>
+                }
+              </li>
+            }
+            @else {
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                There are no users logged in
+              </li>
+            }
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
-  <app-call-request-modal 
-    [show]="incomingCallModalVisible"
-    [username]="callerUsername"
-    (accept)="handleCallAccept($event)"
-    (reject)="handleCallReject($event)">
-  </app-call-request-modal>
-  <app-deny-request-modal
-    [message]="'Call Request denied'"
-    [show]="showDenyModal"
-    (ok)="handleCallDeny()">
-  </app-deny-request-modal>
-  <app-deny-request-modal
-    [message]="'The user you are trying to contact is currently on another call'"
-    [show]="showBusyModal"
-    (ok)="handleBusy()">
-  </app-deny-request-modal>
+    <app-call-request-modal 
+      [show]="incomingCallModalVisible"
+      [username]="callerUsername"
+      (accept)="handleCallAccept($event)"
+      (reject)="handleCallReject($event)">
+    </app-call-request-modal>
+    <app-deny-request-modal
+      [message]="'Call Request denied'"
+      [show]="showDenyModal"
+      (ok)="handleCallDeny()">
+    </app-deny-request-modal>
+    <app-deny-request-modal
+      [message]="'The user you are trying to contact is currently on another call'"
+      [show]="showBusyModal"
+      (ok)="handleBusy()">
+    </app-deny-request-modal>
+    <app-loading-modal
+      [message]="'You are being redirected to your speed dating room'"
+      [show]="showRedirectModal"
+    >
+    </app-loading-modal>
+  }
+  @else {
+    <div  class="alert alert-success text-center" role="alert">
+      Could not retrieve current user
+    </div>
+  }
 }
 @else {
-  <div  class="alert alert-success text-center" role="alert">
-    Could not retrieve current user
-  </div>
+  <app-speed-dating (endDatingEvent)="stopSpeedDating()" [speedDatingGroup]="speedDatingGroup" [userPairings]="userPairings" [userId]="userId"></app-speed-dating>
 }

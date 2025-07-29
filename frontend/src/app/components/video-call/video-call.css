@@ -1,4 +1,9 @@
-
+/*button{
+  background-color:#fd7e14 !important;
+}*/
+.auto-margin{
+  margin:auto;
+}
 video {
   max-height: 300px;
   border-radius: 8px;

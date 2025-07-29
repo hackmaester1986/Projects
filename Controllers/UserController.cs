@@ -33,4 +33,18 @@ public class UserController : ControllerBase
         return BadRequest("Could not get Username");
     }
 
+    [Authorize]
+    [HttpGet("user")]
+    public async Task<IActionResult> GetCurrentUserId()
+    {
+        var userIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (int.TryParse(userIdClaim, out int userId))
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return BadRequest("Could not get Username");
+            return Ok(user.Id);
+        }
+        return BadRequest("Could not get Username");
+    }
+
 }

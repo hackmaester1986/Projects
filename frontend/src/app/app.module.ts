@@ -15,7 +15,9 @@ import { RegisterComponent } from './components/register/register';
 import { RequestModalComponent } from './components/request-modal/request-modal';
 import { HttpClientModule } from '@angular/common/http';
 import { DenyRequestModal } from './components/deny-request-modal/deny-request-modal';
-
+import { SpeedDatingComponent } from './components/speed-dating/speed-dating';
+import { ThankYouModalComponent } from './components/thank-you-modal/thank-you-modal';
+import { LoadingModalComponent } from './components/loading-modal/loading-modal';
 @NgModule({
   declarations: [
     App,
@@ -25,7 +27,10 @@ import { DenyRequestModal } from './components/deny-request-modal/deny-request-m
     HomepageComponent,
     RegisterComponent,
     RequestModalComponent,
-    DenyRequestModal
+    DenyRequestModal,
+    SpeedDatingComponent,
+    ThankYouModalComponent,
+    LoadingModalComponent
   ],
   imports: [
     BrowserModule,

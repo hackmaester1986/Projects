@@ -1,0 +1,35 @@
+<div class="main-wrapper">
+  <div class="video-call-container">
+
+    <div class="text-center speed-title">Welcome to Speed Dating</div>
+    <p class="text-center speed-subtitle">Connect with 3 dates, one at a time!</p>
+
+    <div *ngIf="countdown > 0" class="text-center countdown">
+      Speed dating will begin in {{ countdown }}...
+    </div>
+
+    <div class="videos">
+      <div>
+        <video #localVideo autoplay playsInline muted class="video-box border"></video>
+        <div class="text-center mt-2">{{myUserName}}</div>
+      </div>
+      <div>
+        <video #remoteVideo autoplay playsInline class="video-box border"></video>
+        <div class="text-center mt-2">{{theirUserName}}</div>
+      </div>
+    </div>
+
+    <div *ngIf="sessionCountdown > 0" class="text-center session-countdown">
+      Current date time remaining: {{ sessionCountdown }} seconds
+    </div>
+  </div>
+
+    <div class="sidebar">
+      <h2 class="fw-semibold">Your Group</h2>
+      <ul>
+        <li class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let user of speedDatingGroup">{{ user.userName }}</li>
+      </ul>
+    </div>
+
+    <app-thank-you-modal *ngIf="showThankYouModal" (close)="redirectToVideoCall()"></app-thank-you-modal>
+  </div>

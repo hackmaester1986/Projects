@@ -36,7 +36,7 @@ builder.Services.AddAuthentication(options =>
                 var accessToken = context.Request.Query["access_token"];
 
                 var path = context.HttpContext.Request.Path;
-                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/videochat"))
+                if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/videochat") || path.StartsWithSegments("/date")))
                 {
                     context.Token = accessToken;
                 }
@@ -69,10 +69,11 @@ app.UseCors("AllowAngularDev");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+   // app.UseSwagger();
+   // app.UseSwaggerUI();
 }
 app.MapHub<VideoChatHub>("/videochat");
+app.MapHub<SpeedDatingHub>("/date");
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

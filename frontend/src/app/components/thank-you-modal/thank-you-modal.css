@@ -1,0 +1,52 @@
+.thank-you-modal {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  max-width: 350px;
+  width: 100%;
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937; /* Tailwind gray-800 */
+  margin-bottom: 0.5rem;
+}
+
+.modal-subtitle {
+  font-size: 1rem;
+  color: #6b7280; /* Tailwind gray-500 */
+  margin-bottom: 1.5rem;
+}
+
+.modal-button {
+  background-color: #f3f4f6;       /* light gray */
+  color: #6b7280;                  /* gray text */
+  padding: 0.5rem 1.25rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.modal-button:hover {
+  background-color: #e5e7eb; /* darker gray on hover */
+  border-color: #9ca3af;
+}
+
+/* Optional fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

@@ -1,0 +1,82 @@
+.text-center {
+  text-align: center;
+}
+
+.video-box {
+  width: 480px;
+  height: 360px;
+  background-color: #000;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  object-fit: cover;
+}
+
+/* Wrap the two videos side-by-side with spacing */
+.video-call-container {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+/* Group list similar to right-hand panel */
+.group-sidebar {
+  width: 240px;
+  border-left: 1px solid #ddd;
+  padding-left: 1rem;
+  margin-left: auto;
+  margin-top: 2rem;
+}
+
+/* Optional: countdown and header styles */
+.speed-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-top: 2rem;
+}
+
+.speed-subtitle {
+  margin-top: 0.5rem;
+  color: #6b7280; /* tailwind's gray-600 */
+}
+
+.countdown {
+  margin-top: 1.5rem;
+  font-size: 1.25rem;
+  color: #2563eb; /* tailwind's blue-600 */
+}
+
+.session-countdown {
+  margin-top: 1.5rem;
+  font-size: 1.125rem;
+  color: #16a34a; /* tailwind's green-600 */
+}
+
+.main-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2rem; /* space between video content and sidebar */
+  padding: 2rem;
+}
+
+.video-call-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.videos {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.sidebar {
+  min-width: 200px;
+  max-width: 300px;
+  border-left: 1px solid #ddd;
+  padding-left: 1rem;
+}
